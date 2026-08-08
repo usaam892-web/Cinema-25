@@ -1,32 +1,409 @@
-<!doctype html>
-<html lang="ar" dir="rtl" class="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>Cinema Mix - سينما مكس - تطبيق المشاهدة والتحميل السينمائي</title>
-    
-    <!-- PWA Settings -->
-    <link rel="manifest" href="/manifest.json" />
-    <meta name="theme-color" content="#e11d48" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="Cinema Mix" />
-    <link rel="apple-touch-icon" href="https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=192&h=192&fit=crop&crop=faces" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>" />
-  </head>
-  <body class="bg-black text-zinc-100 antialiased selection:bg-red-600 selection:text-white">
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/sw.js').catch((err) => {
-            console.log('SW registration error:', err);
-          });
-        });
-      }
-    </script>
-  </body>
-</html>
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cinema Mix | سينما مكس - مشاهدة الأفلام والمسلسلات والأنمي</title>
+  
+  <!-- Google Font: Tajawal -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap" rel="stylesheet">
 
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Tajawal', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              red: '#e50914',
+              gold: '#f59e0b',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- React 18 & ReactDOM UMD -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <!-- Babel for JSX -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Tajawal', sans-serif;
+      background-color: #09090b;
+      color: #f4f4f5;
+      margin: 0;
+      padding: 0;
+      overflow-x: hidden;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #09090b;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #27272a;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #3f3f46;
+    }
+  </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 min-h-screen selection:bg-red-600 selection:text-white">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo } = React;
+
+    // --- SAMPLE MEDIA DATA ---
+    const INITIAL_MEDIA = [
+      {
+        id: 'm1',
+        title: 'آفاتار: طريق الماء (The Way of Water)',
+        originalTitle: 'Avatar: The Way of Water',
+        type: 'movie',
+        poster: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=600&auto=format&fit=crop',
+        backdrop: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop',
+        rating: 9.3,
+        year: 2024,
+        duration: '3 ساعات 12 دقيقة',
+        genres: ['أفلام', 'خيال علمي', 'مغامرات', 'أكشن'],
+        description: 'يتعين على جيك سوليونيتيري حماية عائلتهما واستكشاف أقاليم جديدة في باوندورا لمواجهة تهديد قديم عاد لينتقم.',
+        cast: ['سام ورذينجتن', 'زوي سالدانا', 'سيغورني ويفر'],
+        director: 'جيمس كاميرون',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        featured: true,
+        trending: true,
+        isSubtitled: true,
+        isDubbed: true,
+        ageRating: '+13',
+        downloadOptions: [
+          { quality: '1080p', size: '2.8 GB', format: 'MP4' },
+          { quality: '720p', size: '1.4 GB', format: 'MP4' },
+        ]
+      },
+      {
+        id: 'm2',
+        title: 'كثبان: الجزء الثاني (Dune: Part Two)',
+        originalTitle: 'Dune: Part Two',
+        type: 'movie',
+        poster: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
+        backdrop: 'https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=1200&auto=format&fit=crop',
+        rating: 8.8,
+        year: 2024,
+        duration: '2 ساعة 46 دقيقة',
+        genres: ['أفلام', 'خيال علمي', 'مغامرات', 'دراما'],
+        description: 'يتحد بول أتريدس مع تشاني والشعب الفريمن ليرأس مسيرة الانتقام من المؤامرة التي دمرت عائلته.',
+        cast: ['تيموثي شالاماي', 'زيندايا', 'ريبيكا فيرغسون'],
+        director: 'دينيس فيلنوف',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+        featured: false,
+        trending: true,
+        isSubtitled: true,
+        isDubbed: false,
+        ageRating: '+16',
+        downloadOptions: [
+          { quality: '1080p', size: '3.1 GB', format: 'MP4' },
+          { quality: '720p', size: '1.5 GB', format: 'MP4' },
+        ]
+      },
+      {
+        id: 's1',
+        title: 'صراع العروش: بيت التنين (House of the Dragon)',
+        originalTitle: 'House of the Dragon',
+        type: 'series',
+        poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600&auto=format&fit=crop',
+        backdrop: 'https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1200&auto=format&fit=crop',
+        rating: 9.1,
+        year: 2024,
+        seasonsCount: 2,
+        episodesCount: 18,
+        genres: ['مسلسلات', 'دراما', 'خيال', 'أكشن'],
+        description: 'قصة آل تارغاريان وبداية النزاع الداخلي الذي أدى إلى حرب الأهلية الشهيرة باسم رقصة التنانين.',
+        cast: ['مات سميث', 'إيما دارسي', 'أوليفيا كوك'],
+        director: 'رايان كونجال',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4',
+        featured: false,
+        trending: true,
+        isSubtitled: true,
+        isDubbed: true,
+        ageRating: '+18',
+        seasons: [
+          {
+            seasonNumber: 1,
+            episodes: [
+              { id: 's1-e1', number: 1, title: 'ورثة التنين', duration: '60 دقيقة', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4' },
+              { id: 's1-e2', number: 2, title: 'الأمير المتمرد', duration: '54 دقيقة', videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4' }
+            ]
+          }
+        ],
+        downloadOptions: [
+          { quality: '1080p', size: '1.2 GB', format: 'MP4' },
+          { quality: '720p', size: '600 MB', format: 'MP4' }
+        ]
+      },
+      {
+        id: 'a1',
+        title: 'قاتل الشياطين: قلعة اللانهائية (Demon Slayer)',
+        originalTitle: 'Kimetsu no Yaiba',
+        type: 'anime',
+        poster: 'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=600&auto=format&fit=crop',
+        backdrop: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=1200&auto=format&fit=crop',
+        rating: 9.2,
+        year: 2024,
+        genres: ['أنمي', 'أكشن', 'فانتازيا', 'خارق للطبيعة'],
+        description: 'يخوض تانجيرو وأعضاء فيلق قاتلي الشياطين مواجهة مصيرية وأخيرة داخل قلعة اللانهائية.',
+        cast: ['ناتسوكي هاناي', 'أكاري كيتو'],
+        director: 'هاروو سوتوزاكي',
+        videoUrl: 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutback2012.mp4',
+        featured: false,
+        trending: true,
+        isSubtitled: true,
+        isDubbed: true,
+        ageRating: '+16',
+        downloadOptions: [
+          { quality: '1080p', size: '900 MB', format: 'MP4' },
+          { quality: '720p', size: '450 MB', format: 'MP4' }
+        ]
+      }
+    ];
+
+    // --- ICONS (SVG Helpers) ---
+    const IconPlay = () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>;
+    const IconHeart = ({ filled }) => (
+      <svg className={`w-5 h-5 ${filled ? 'fill-red-500 text-red-500' : 'text-zinc-400 hover:text-red-500'}`} viewBox="0 0 24 24" stroke="currentColor" fill="none" strokeWidth="2">
+        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+      </svg>
+    );
+    const IconStar = () => <svg className="w-4 h-4 fill-amber-400 text-amber-400" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>;
+    const IconSearch = () => <svg className="w-5 h-5 text-zinc-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>;
+    const IconDownload = () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>;
+    const IconLock = () => <svg className="w-4 h-4 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>;
+
+    // --- MAIN APP ---
+    function App() {
+      const [mediaList, setMediaList] = useState(() => {
+        const saved = localStorage.getItem('cinemax_media_list');
+        return saved ? JSON.parse(saved) : INITIAL_MEDIA;
+      });
+      const [watchlist, setWatchlist] = useState(() => {
+        const saved = localStorage.getItem('cinemax_watchlist');
+        return saved ? JSON.parse(saved) : ['m1'];
+      });
+      
+      const [activeTab, setActiveTab] = useState('all'); // all, movie, series, anime, watchlist, publisher
+      const [searchQuery, setSearchQuery] = useState('');
+      const [selectedMedia, setSelectedMedia] = useState(null);
+      const [showPublisherModal, setShowPublisherModal] = useState(false);
+
+      // Save to localStorage
+      useEffect(() => {
+        localStorage.setItem('cinemax_media_list', JSON.stringify(mediaList));
+      }, [mediaList]);
+
+      useEffect(() => {
+        localStorage.setItem('cinemax_watchlist', JSON.stringify(watchlist));
+      }, [watchlist]);
+
+      // Featured hero item
+      const heroMedia = useMemo(() => {
+        return mediaList.find(m => m.featured) || mediaList[0];
+      }, [mediaList]);
+
+      // Filtered items
+      const filteredList = useMemo(() => {
+        return mediaList.filter(item => {
+          const matchesTab = 
+            activeTab === 'all' ? true :
+            activeTab === 'watchlist' ? watchlist.includes(item.id) :
+            item.type === activeTab;
+
+          const matchesSearch = 
+            !searchQuery || 
+            item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.originalTitle.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            item.genres.some(g => g.includes(searchQuery));
+
+          return matchesTab && matchesSearch;
+        });
+      }, [mediaList, activeTab, searchQuery, watchlist]);
+
+      const toggleWatchlist = (id) => {
+        setWatchlist(prev => 
+          prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
+        );
+      };
+
+      const handleAddMedia = (newItem) => {
+        setMediaList(prev => [newItem, ...prev]);
+        setShowPublisherModal(false);
+        alert('تمت إضافة العرض بنجاح إلى القائمة!');
+      };
+
+      return (
+        <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col dir-rtl">
+          
+          {/* TOP HEADER */}
+          <header className="sticky top-0 z-40 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/80 px-4 py-3">
+            <div className="max-w-7xl mx-auto flex items-center justify-between gap-4">
+              
+              {/* Logo */}
+              <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveTab('all')}>
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-red-500 flex items-center justify-center font-black text-2xl text-white shadow-lg shadow-red-600/30">
+                  C
+                </div>
+                <div>
+                  <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-1">
+                    سينما<span className="text-red-500">مكس</span>
+                    <span className="text-[10px] bg-red-600/20 text-red-400 border border-red-500/30 px-1.5 py-0.5 rounded font-bold">RED</span>
+                  </h1>
+                </div>
+              </div>
+
+              {/* Main Navigation Tabs */}
+              <nav className="hidden md:flex items-center gap-1 bg-zinc-900/80 p-1 rounded-2xl border border-zinc-800">
+                <button onClick={() => setActiveTab('all')} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'all' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>الكل</button>
+                <button onClick={() => setActiveTab('movie')} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'movie' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>الأفلام</button>
+                <button onClick={() => setActiveTab('series')} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'series' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>المسلسلات</button>
+                <button onClick={() => setActiveTab('anime')} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all ${activeTab === 'anime' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>الأنمي</button>
+                <button onClick={() => setActiveTab('watchlist')} className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${activeTab === 'watchlist' ? 'bg-red-600 text-white shadow-md' : 'text-zinc-400 hover:text-white'}`}>
+                  المفضلة ({watchlist.length})
+                </button>
+              </nav>
+
+              {/* Publisher / Admin Panel & Revenue Badge */}
+              <div className="flex items-center gap-3">
+                <div className="bg-emerald-950/60 border border-emerald-500/30 px-3 py-1.5 rounded-xl text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                  <span>الأرباح:</span>
+                  <span className="text-white font-extrabold">$124.50</span>
+                </div>
+                <button 
+                  onClick={() => setShowPublisherModal(true)}
+                  className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all active:scale-95"
+                >
+                  <IconLock />
+                  <span>لوحة المدير</span>
+                </button>
+              </div>
+
+            </div>
+          </header>
+
+          {/* SEARCH BAR FOR MOBILE & DESKTOP */}
+          <div className="max-w-7xl mx-auto w-full px-4 pt-4">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="ابحث عن فيلم، مسلسل، أنمي، أو تصنيف..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-zinc-900 border border-zinc-800 rounded-2xl py-3 pr-11 pl-4 text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-red-500 focus:ring-1 focus:ring-red-500 transition-all"
+              />
+              <div className="absolute right-3.5 top-3.5">
+                <IconSearch />
+              </div>
+            </div>
+          </div>
+
+          {/* HERO BANNER (Top Featured Item) */}
+          {heroMedia && activeTab === 'all' && !searchQuery && (
+            <section className="max-w-7xl mx-auto w-full px-4 pt-4">
+              <div className="relative rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900 min-h-[360px] md:min-h-[440px] flex items-end p-6 sm:p-10 shadow-2xl">
+                {/* Backdrop Image */}
+                <img 
+                  src={heroMedia.backdrop || heroMedia.poster} 
+                  alt={heroMedia.title}
+                  className="absolute inset-0 w-full h-full object-cover object-center opacity-40 filter brightness-90"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent"></div>
+
+                {/* Hero Info */}
+                <div className="relative z-10 max-w-2xl space-y-4">
+                  <div className="flex flex-wrap items-center gap-2 text-xs font-bold">
+                    <span className="bg-red-600 text-white px-2.5 py-1 rounded-lg">🔥 الأكثر مشاهدة اليوم</span>
+                    <span className="bg-amber-400/20 text-amber-300 border border-amber-400/40 px-2 py-0.5 rounded-lg flex items-center gap-1">
+                      <IconStar /> {heroMedia.rating}
+                    </span>
+                    <span className="text-zinc-300">{heroMedia.year}</span>
+                    <span className="text-zinc-400">• {heroMedia.duration || 'موسمين'}</span>
+                  </div>
+
+                  <h2 className="text-2xl sm:text-4xl font-black text-white leading-tight" dir="auto">
+                    <bdi>{heroMedia.title}</bdi>
+                  </h2>
+
+                  <p className="text-xs sm:text-sm text-zinc-300 line-clamp-2 leading-relaxed">
+                    {heroMedia.description}
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <button 
+                      onClick={() => setSelectedMedia(heroMedia)}
+                      className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2.5 rounded-xl text-sm flex items-center gap-2 shadow-lg shadow-red-600/30 transition-all active:scale-95"
+                    >
+                      <IconPlay />
+                      <span>مشاهدة الآن</span>
+                    </button>
+                    <button 
+                      onClick={() => toggleWatchlist(heroMedia.id)}
+                      className="bg-zinc-800/80 hover:bg-zinc-700 text-zinc-200 border border-zinc-700 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all"
+                    >
+                      <IconHeart filled={watchlist.includes(heroMedia.id)} />
+                      <span>{watchlist.includes(heroMedia.id) ? 'في المفضلة' : 'إضافة للمفضلة'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          )}
+
+          {/* MAIN CONTENT GRID */}
+          <main className="max-w-7xl mx-auto w-full px-4 py-8 flex-1">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-600"></span>
+                <span>
+                  {activeTab === 'all' ? 'جميع العروض والإنتاجات' :
+                   activeTab === 'movie' ? 'قسم الأفلام' :
+                   activeTab === 'series' ? 'قسم المسلسلات' :
+                   activeTab === 'anime' ? 'قسم الأنمي' : 'قائمة المفضلة'}
+                </span>
+              </h2>
+              <span className="text-xs text-zinc-400 font-bold">
+                ({filteredList.length} عرض)
+              </span>
+            </div>
+
+            {filteredList.length === 0 ? (
+              <div className="text-center py-16 bg-zinc-900/50 rounded-3xl border border-zinc-800 p-8 space-y-3">
+                <p className="text-zinc-400 text-sm font-bold">لا توجد عروض مطابقة للبحث أو القسم المحدد.</p>
+                <button 
+                  onClick={() => { setSearchQuery(''); setActiveTab('all'); }}
+                  className="bg-red-600/20 text-red-400 border border-red-500/30 px-4 py-2 rounded-xl text-xs font-bold hover:bg-red-600 hover:text-white transition-all"
+                >
+                  إعادة ضبط البحث
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                {filteredList.map(item => (
+                  <div 
+                    key={item.id}
+                    className="group bg-zinc-900 rounded-2xl overflow-hidden border border-zinc-800 hover:border-red-600/50 transition-all duration-300 flex flex-col shadow-lg hover:shadow-red-600/10 cursor-pointer"
+                    onClick={() => setSelectedMedia(item)}
+                  >
+                    {/* Poster Image */}
+                    <div className="relative aspe
