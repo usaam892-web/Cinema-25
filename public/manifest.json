@@ -1,0 +1,24 @@
+{
+  "name": "Cinema Mix - سينما مكس للمشاهدة والتحميل",
+  "short_name": "Cinema Mix",
+  "description": "تطبيق بث وتحميل الأفلام والمسلسلات والأنمي بجودات عالية",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#e11d48",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=192&h=192&fit=crop&crop=faces",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=512&h=512&fit=crop&crop=faces",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

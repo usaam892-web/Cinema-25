@@ -1,0 +1,6 @@
+{
+  "name": "Cinema Mix",
+  "description": "تطبيق بث وتحميل الأفلام والمسلسلات والأنمي مع منصة إعلانات وأرباح مدمجة ودعم الجودات المتعددة",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

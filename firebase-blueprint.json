@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "users": {
+      "title": "User Profile",
+      "description": "Registered users",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["uid", "email"]
+    },
+    "watchlist": {
+      "title": "User Watchlist Item",
+      "description": "Saved media in user watchlist",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "mediaId": { "type": "string" },
+        "media": { "type": "object" },
+        "addedAt": { "type": "string" }
+      },
+      "required": ["userId", "mediaId"]
+    },
+    "customMedia": {
+      "title": "User Custom Movie",
+      "description": "Movies added by users",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "type": { "type": "string" },
+        "poster": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "title"]
+    }
+  },
+  "securityRules": [
+    {
+      "collection": "users",
+      "read": "request.auth != null && request.auth.uid == resource.data.uid",
+      "write": "request.auth != null && request.auth.uid == request.resource.data.uid"
+    },
+    {
+      "collection": "watchlist",
+      "read": "request.auth != null && resource.data.userId == request.auth.uid",
+      "write": "request.auth != null && request.resource.data.userId == request.auth.uid"
+    },
+    {
+      "collection": "customMedia",
+      "read": "true",
+      "write": "request.auth != null"
+    }
+  ]
+}
